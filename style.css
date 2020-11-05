@@ -1,0 +1,105 @@
+header {
+    background: #333;
+    color: #fff;
+    padding: 15px;
+    
+    text-align: center;
+}
+
+.searchLabel {
+    font-size: 30px;
+    padding-left: 20px;
+
+}
+
+#input {
+    margin-left: 20px;
+}
+
+#submit {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+aside {
+    padding: 20px;
+    background: rgb(233, 230, 230);
+    
+}
+
+.pastSearches {
+    background: #fff;
+    
+}
+
+form {
+    margin-bottom: 15px;
+}
+
+.city {
+    /* border-style:solid; */
+    margin: 10px;
+    
+}
+
+.card {
+    margin: 20px;
+}
+
+.box {
+    margin: 10px;
+    padding: 20px;
+    width:fit-content;
+    background: rgb(0, 132, 255);
+    color: white;
+    float: left;
+    line-height: 1.5;
+}
+
+
+#cityInfo {
+    line-height: 1.5;
+    font-size: 20px;
+}
+
+.date {
+    font-size: 20px;
+}
+
+/* span {
+    
+   
+    1-2 GREEN
+    3-5 YELLOW
+    6-7 ORANGE
+    8-10 RED
+    11+ PURPLE 
+}
+    */ 
+
+
+.green {
+    background: green;
+    color: white;
+    padding: 5px;
+}
+.yellow {
+    background: yellow;
+    padding: 5px;
+}
+.orange {
+    background: orange;
+    padding: 5px;
+}
+.red {
+    background: red;
+    color: white;
+    padding: 5px;
+}
+.purple {
+    background: purple;
+    color: white;
+    padding: 5px;
+}
+
+
