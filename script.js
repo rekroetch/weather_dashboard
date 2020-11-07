@@ -5,22 +5,61 @@ var search = document.querySelector('#input')
 // ICON LINK EX: http://openweathermap.org/img/wn/10d@2x.png
 // change the 10d ^^
 
-var history = localStorage.getItem('history')
-$('li').text(history)
+
+var searchHistory = JSON.parse(localStorage.getItem("history"))
+
+searchHistory.reverse().forEach(function(historyItem){
+    var historyEl = $('<li class="list-group-item">'+historyItem+'</li>')
+    $('.pastSearches').append(historyEl)
+    
+})
+let pastSearches = searchHistory
+
+// function init() {
+//     var history = JSON.parse(localStorage.getItem("history"))
+//     // if (search.value !== null) {
+//     //     var pastSearches = $('.pastSearches')
+//     //     pastSearches = search.value
+//     // }
+
+//     for (var i = 0; i < pastSearches.length; i++) {
+//         var pastSearch = pastSearches[i];
+    
+//         var li = document.createElement("li");
+//         li.textContent = pastSearch;
+//         // li.setAttribute("data-index", i);
+    
+    
+    
+//         // li.appendChild(button);
+//         // todoList.appendChild(li);
+//         $('.pastSearches').append(li)
+//       }
+// }
 
 
 $('#submit').on('click', function(event){
     event.preventDefault()
     var searchCity = search.value
-    console.log(searchCity)
+    // searchCity.setAttribute('data-city', searchCity)
+
+    // clears input box
+    search.value = ""
     
+    pastSearches.push(searchCity)
+    localStorage.setItem("history", JSON.stringify(pastSearches))
+
     $('.pastSearches').prepend('<li>'+searchCity+'</li>')
     $('li').addClass("list-group-item")
+    // $('li').attr("data-city", searchCity)
+
     
-    localStorage.setItem("history", searchCity)
+
+
+
+
     
     var queryUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + searchCity + "&units=imperial&appid=" + myAPI;
-    
     
     $.ajax({
         url: queryUrl,
@@ -29,10 +68,10 @@ $('#submit').on('click', function(event){
         $('#cityName').empty()
         $('#cityInfo').empty()
 
-        // console.log(Date(response.dt))
+        
 
         let date = new Date(response.dt * 1000)
-        console.log(date.toLocaleDateString('en-US'))
+        
 
         console.log(response)
         console.log("temp: " + response.main.temp)
@@ -96,23 +135,26 @@ $('#submit').on('click', function(event){
                 var iconFive = 'http://openweathermap.org/img/wn/'+ responseNew.daily[i].weather[0].icon + '@2x.png'
                 var iconFiveImg = $('<img>')
                 iconFiveImg.attr('src', iconFive)
+                
 
                 var dateFive = new Date(responseNew.daily[i].dt * 1000)
-    
-                $('.forecast').append(
-                    '<div class="card box">'+
-                    '<div class="date">'+dateFive.toLocaleDateString('en-US')+'</div>'+
-                    iconFiveImg +
-                    '<div>High: '+responseNew.daily[i].temp.max+'ºF</div>'+
-                    '<div>Low: '+responseNew.daily[i].temp.min+'ºF</div>'+
-                    '<div>Humidity: '+responseNew.daily[i].humidity+'%</div>'+
-                    
-                    '</div>',
 
-                    
-                )
-           
+                var dayBox = $(
+                '<div class="card box">'+
+                '<div class="date">'+dateFive.toLocaleDateString('en-US')+'</div>'+
+                '<div class="icon"></div>'+
+                '<div>High: '+responseNew.daily[i].temp.max+'ºF</div>'+
+                '<div>Low: '+responseNew.daily[i].temp.min+'ºF</div>'+
+                '<div>Humidity: '+responseNew.daily[i].humidity+'%</div>'+
+                
+                '</div>')
+                
+                $('.icon').append(iconFiveImg)
+
+                $('.forecast').append(dayBox)
             }    
+            // does not work correctly
+            // $('.box').append(iconFiveImg)
            
         })
 
@@ -158,3 +200,102 @@ $('#submit').on('click', function(event){
 //     })
 
  })
+
+$('.pastSearches').on('click', 'li', function(event) {
+    event.preventDefault()
+    console.log($(this).text())
+    
+    var clickUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + $(this).text() + "&units=imperial&appid=" + myAPI;
+    
+    
+    $.ajax({
+        url: clickUrl,
+        method: 'GET'
+    }).then(function(response){
+        $('#cityName').empty()
+        $('#cityInfo').empty()
+
+        let date = new Date(response.dt * 1000)
+        
+        var icon = 'http://openweathermap.org/img/wn/'+ response.weather[0].icon + '@2x.png'
+
+        var iconImg = $('<img>')
+        iconImg.attr('src', icon)
+        $('#cityName').append(iconImg)
+
+        // PROBLEM WITH $THIS
+        $('#cityName').append($(this).text() + " | " + date.toLocaleDateString('en-US'))
+        $('#cityInfo').append('<div>Temperature: '+response.main.temp+'ºF</div>')
+        $('#cityInfo').append('<div>Humidity: '+response.main.humidity+'%</div>')
+        $('#cityInfo').append('<div>Wind Speed: '+response.wind.speed+' mph</div>')
+
+        var lat = response.coord.lat
+        var lon = response.coord.lon 
+        var uv = "https://api.openweathermap.org/data/2.5/onecall?lat=" +lat+ "&lon=" +lon+ "&units=imperial&exclude=minutely,hourly,alerts&appid=" + myAPI
+
+        $.ajax({
+            url: uv,
+            method: 'GET'
+        }).then(function(responseNew){
+            var uvindex = responseNew.current.uvi
+            
+
+            console.log(responseNew)
+            $('#cityInfo').append('<div>UV Index: '+'<span>'+uvindex+'</span>'+'</div>')
+
+            if (uvindex <= 2) {
+                // show green
+                $('span').addClass('green')
+                console.log("green")
+            } else if (uvindex <= 5) {
+                // show yellow
+                $('span').addClass('yellow')
+                console.log("yellow")
+            } else if (uvindex <= 7) {
+                // show orange
+                $('span').addClass('orange')
+                console.log('orange')
+            } else if (uvindex <= 10) {
+                // show red
+                $('span').addClass('red')
+                console.log('red')
+            } else {
+                // show purple
+                $('span').addClass('purple')
+                console.log("purple")
+            }
+
+
+            $('.forecast').empty()
+
+            for (var i = 1; i < 6; i++) {
+
+                var iconFive = 'http://openweathermap.org/img/wn/'+ responseNew.daily[i].weather[0].icon + '@2x.png'
+                var iconFiveImg = $('<img>')
+                iconFiveImg.attr('src', iconFive)
+                
+
+                var dateFive = new Date(responseNew.daily[i].dt * 1000)
+    
+                $('.forecast').append(
+                    '<div class="card box">'+
+                    '<div class="date">'+dateFive.toLocaleDateString('en-US')+'</div>'+
+                    iconFiveImg +
+                    '<div>High: '+responseNew.daily[i].temp.max+'ºF</div>'+
+                    '<div>Low: '+responseNew.daily[i].temp.min+'ºF</div>'+
+                    '<div>Humidity: '+responseNew.daily[i].humidity+'%</div>'+
+                    
+                    '</div>',
+
+                    
+                )
+            }    
+            // does not work correctly
+            $('.box').append(iconFiveImg)
+           
+        })
+
+        
+    
+    })
+})
