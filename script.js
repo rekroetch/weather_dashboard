@@ -2,6 +2,7 @@ var myAPI = "131f90ece0cb3488d9a1ed02e7222d34"
 var search = document.querySelector('#input')
 
 let pastSearches = []
+let storedForecastArray = []
 function init() {
     
     var searchHistory = JSON.parse(localStorage.getItem("history"))
@@ -15,11 +16,25 @@ function init() {
         pastSearches = searchHistory
     }   
 
+    var storedCityName = JSON.parse(localStorage.getItem('storedCityName'))
+    $('#cityName').append(storedCityName)
+
+    var storedCityInfo = JSON.parse(localStorage.getItem('storedCityInfo'))
+    $('#cityInfo').append(storedCityInfo)
+    // $('#cityInfo')
+
+    var storedForecast = localStorage.getItem('storedForecast')
+    $('.forecast').append(storedForecast)
+    // $('.forecast').addClass('card box')
+
+
 }
 init()
 
 
 $('#submit').on('click', function(event){
+    // resets empty array
+    var storedForecastArray = []
     event.preventDefault()
     var searchCity = search.value
     var capitalSearchCity = searchCity.charAt(0).toUpperCase() + searchCity.slice(1)
@@ -62,9 +77,24 @@ $('#submit').on('click', function(event){
 
         
         $('#cityName').append(response.name+ " | " + date.toLocaleDateString('en-US'))
-        $('#cityInfo').append('<div>Temperature: '+response.main.temp+'ºF</div>')
-        $('#cityInfo').append('<div>Humidity: '+response.main.humidity+'%</div>')
-        $('#cityInfo').append('<div>Wind Speed: '+response.wind.speed+' mph</div>')
+        // $('#cityInfo').append('<div>Temperature: '+response.main.temp+'ºF</div>')
+        // $('#cityInfo').append('<div>Humidity: '+response.main.humidity+'%</div>')
+        // $('#cityInfo').append('<div>Wind Speed: '+response.wind.speed+' mph</div>')
+
+        // var cityName = $(response.name+ " | " + date.toLocaleDateString('en-US'))
+        var tempMain = $('<div>Temperature: '+response.main.temp+'ºF</div>')
+        var humidityMain = $('<div>Humidity: '+response.main.humidity+'%</div>')
+        var windMain = $('<div>Wind Speed: '+response.wind.speed+' mph</div>')
+
+        $('#cityInfo').append(tempMain, humidityMain, windMain)
+
+
+
+                var cityName = $('#cityName').text()
+
+                localStorage.setItem('storedCityName', JSON.stringify(cityName))
+
+                
 
         var lat = response.coord.lat
         var lon = response.coord.lon 
@@ -76,9 +106,11 @@ $('#submit').on('click', function(event){
         }).then(function(responseNew){
             var uvindex = responseNew.current.uvi
             
+            var uvindexAdd = ('<div>UV Index: '+'<span>'+uvindex+'</span>'+'</div>')
 
             console.log(responseNew)
-            $('#cityInfo').append('<div>UV Index: '+'<span>'+uvindex+'</span>'+'</div>')
+            $('#cityInfo').append(uvindexAdd)
+            
 
             if (uvindex <= 2) {
                 // show green
@@ -102,6 +134,9 @@ $('#submit').on('click', function(event){
                 console.log("purple")
             }
 
+                // var cityInfo = $('#cityInfo').text()
+                localStorage.setItem('storedCityInfo', JSON.stringify(tempMain.text()+"<br>"+humidityMain.text()+"<br>"+windMain.text()+"<br>"+uvindexAdd))
+
 
             $('.forecast').empty()
 
@@ -123,8 +158,13 @@ $('#submit').on('click', function(event){
                 
                 $(dayBox).append(date, icon, high, low, humidity)
                 $('.forecast').append(dayBox)
+
+                    // var forecast = $('.forecast').text()
+                    // localStorage.setItem('storedForecast', JSON.stringify(forecast))
+                    storedForecastArray.push(JSON.stringify(date.text() + "<br>"+ high.text()+"<br>"+ low.text()+"<br>"+ humidity.text()+"<br><br>"))
             }    
-            
+                // localStorage.setItem('storedForecast', JSON.stringify(date.text() + "<br>" +icon+"<br>"+ high.text()+"<br>"+ low.text()+"<br>"+ humidity.text()))
+            localStorage.setItem('storedForecast', storedForecastArray)
         })
 
     })
