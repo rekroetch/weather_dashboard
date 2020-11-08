@@ -1,8 +1,11 @@
 var myAPI = "131f90ece0cb3488d9a1ed02e7222d34"
 var search = document.querySelector('#input')
 
+// EMPTY ARRAYS FOR LOCAL STORAGE USE
 let pastSearches = []
 let storedForecastArray = []
+
+// PULLS FROM LOCAL STORAGE WHEN APP IS OPENED OR REFRESHED
 function init() {
     
     var searchHistory = JSON.parse(localStorage.getItem("history"))
@@ -21,17 +24,14 @@ function init() {
 
     var storedCityInfo = JSON.parse(localStorage.getItem('storedCityInfo'))
     $('#cityInfo').append(storedCityInfo)
-    // $('#cityInfo')
-
+    
     var storedForecast = localStorage.getItem('storedForecast')
     $('.forecast').append(storedForecast)
-    // $('.forecast').addClass('card box')
-
-
+    
 }
 init()
 
-
+// WHEN SEARCH BUTTON IS CLICKED:
 $('#submit').on('click', function(event){
     // resets empty array
     var storedForecastArray = []
@@ -42,9 +42,11 @@ $('#submit').on('click', function(event){
     // clears input box
     search.value = ""
     
+    // PAST CITY SEARCHES TO LOCAL STORAGE
     pastSearches.push(capitalSearchCity)
     localStorage.setItem("history", JSON.stringify(pastSearches))
 
+    // ADD PAST SEARCHES BELOW SEARCH BAR
     $('.pastSearches').prepend('<li>'+capitalSearchCity+'</li>')
     $('li').addClass("list-group-item")
 
@@ -63,11 +65,8 @@ $('#submit').on('click', function(event){
         let date = new Date(response.dt * 1000)
         
 
-        console.log(response)
-        console.log("temp: " + response.main.temp)
-        console.log("wind speed: " + response.wind.speed)
-        console.log("humidity: " + response.main.humidity)
         
+        // WEATHER ICON FOR CURRENT WEATHER HEADING
         var icon = 'http://openweathermap.org/img/wn/'+ response.weather[0].icon + '@2x.png'
 
         var iconImg = $('<img>')
@@ -75,27 +74,24 @@ $('#submit').on('click', function(event){
         $('#cityName').append(iconImg)
         
 
-        
+        // ADD NAME AND DATE TO CURRENT WEATHER HEADING
         $('#cityName').append(response.name+ " | " + date.toLocaleDateString('en-US'))
-        // $('#cityInfo').append('<div>Temperature: '+response.main.temp+'ºF</div>')
-        // $('#cityInfo').append('<div>Humidity: '+response.main.humidity+'%</div>')
-        // $('#cityInfo').append('<div>Wind Speed: '+response.wind.speed+' mph</div>')
-
-        // var cityName = $(response.name+ " | " + date.toLocaleDateString('en-US'))
+        
+        // VARIABLES FOR CITY INFO AREA
         var tempMain = $('<div>Temperature: '+response.main.temp+'ºF</div>')
         var humidityMain = $('<div>Humidity: '+response.main.humidity+'%</div>')
         var windMain = $('<div>Wind Speed: '+response.wind.speed+' mph</div>')
 
+        // APPEND VARIABLES TO CITY INFO
         $('#cityInfo').append(tempMain, humidityMain, windMain)
 
 
-
-                var cityName = $('#cityName').text()
-
-                localStorage.setItem('storedCityName', JSON.stringify(cityName))
+        // CITY NAME TO LOCAL STORAGE
+        var cityName = $('#cityName').text()
+        localStorage.setItem('storedCityName', JSON.stringify(cityName))
 
                 
-
+        // LATITUDE AND LONGITUDE FOR NEW API SEARCH
         var lat = response.coord.lat
         var lon = response.coord.lon 
         var uv = "https://api.openweathermap.org/data/2.5/onecall?lat=" +lat+ "&lon=" +lon+ "&units=imperial&exclude=minutely,hourly,alerts&appid=" + myAPI
@@ -104,14 +100,15 @@ $('#submit').on('click', function(event){
             url: uv,
             method: 'GET'
         }).then(function(responseNew){
+
+            // UV INDEX FROM NEW API SEARCH
             var uvindex = responseNew.current.uvi
-            
             var uvindexAdd = ('<div>UV Index: '+'<span>'+uvindex+'</span>'+'</div>')
 
-            console.log(responseNew)
+            // ADD UV INDEX TO CITY INFO
             $('#cityInfo').append(uvindexAdd)
             
-
+            // HIGHLIGHTS THE UV INDEX BASED ON SEVERITY
             if (uvindex <= 2) {
                 // show green
                 $('span').addClass('green')
@@ -134,14 +131,16 @@ $('#submit').on('click', function(event){
                 console.log("purple")
             }
 
-                // var cityInfo = $('#cityInfo').text()
-                localStorage.setItem('storedCityInfo', JSON.stringify(tempMain.text()+"<br>"+humidityMain.text()+"<br>"+windMain.text()+"<br>"+uvindexAdd))
+            // CITY INFO TO LOCAL STORAGE   
+            localStorage.setItem('storedCityInfo', JSON.stringify(tempMain.text()+"<br>"+humidityMain.text()+"<br>"+windMain.text()+"<br>"+uvindexAdd))
 
-
+            // RESETS FORECASTS AREA FOR EACH SEARCH
             $('.forecast').empty()
 
+            // LOOPS OVER API RESPONSE 5 TIMES TO GET FORECAST
             for (var i = 1; i < 6; i++) {
 
+                // WEATHER ICONS
                 var iconFive = 'http://openweathermap.org/img/wn/'+ responseNew.daily[i].weather[0].icon + '@2x.png'
                 var iconFiveImg = $('<img>')
                 iconFiveImg.attr('src', iconFive)
@@ -149,6 +148,7 @@ $('#submit').on('click', function(event){
 
                 var dateFive = new Date(responseNew.daily[i].dt * 1000)
 
+                // VARIABLES FOR EACH ITEM ON FORECAST CARDS
                 var dayBox = $('<div class="card box">')
                 var date = $('<div class="date">'+dateFive.toLocaleDateString('en-US')+'</div>')
                 var icon = $('<div class="icon"><img src="http://openweathermap.org/img/wn/' +responseNew.daily[i].weather[0].icon+'@2x.png"></div>')
@@ -156,14 +156,14 @@ $('#submit').on('click', function(event){
                 var low = $('<div>Low: '+responseNew.daily[i].temp.min+'ºF</div>')
                 var humidity = $('<div>Humidity: '+responseNew.daily[i].humidity+'%</div>')
                 
+                // APPEND VARIABLES TO FORECAST CARDS
                 $(dayBox).append(date, icon, high, low, humidity)
                 $('.forecast').append(dayBox)
 
-                    // var forecast = $('.forecast').text()
-                    // localStorage.setItem('storedForecast', JSON.stringify(forecast))
-                    storedForecastArray.push(JSON.stringify(date.text() + "<br>"+ high.text()+"<br>"+ low.text()+"<br>"+ humidity.text()+"<br><br>"))
+                // 5 DAY FORECAST TO ARRAY   
+                storedForecastArray.push(JSON.stringify(date.text() + "<br>"+ high.text()+"<br>"+ low.text()+"<br>"+ humidity.text()+"<br><br>"))
             }    
-                // localStorage.setItem('storedForecast', JSON.stringify(date.text() + "<br>" +icon+"<br>"+ high.text()+"<br>"+ low.text()+"<br>"+ humidity.text()))
+            // 5 DAY FORECAST TO LOCAL STORAGE
             localStorage.setItem('storedForecast', storedForecastArray)
         })
 
@@ -171,6 +171,11 @@ $('#submit').on('click', function(event){
 
 })
 
+
+// FOLLOWING REPEATS LOGIC ABOVE, USES PAST SEARCH CLICK RATHER THAN NEW SEARCH
+
+
+// WHEN A PAST SEARCH IS CLICKED: 
 $('.pastSearches').on('click', 'li', function(event) {
     event.preventDefault()
     console.log($(this).text())
@@ -178,23 +183,26 @@ $('.pastSearches').on('click', 'li', function(event) {
     
     var clickUrl = "https://api.openweathermap.org/data/2.5/weather?q=" + $(this).text() + "&units=imperial&appid=" + myAPI;
     
-    
+    // USES API
     $.ajax({
         url: clickUrl,
         method: 'GET'
     }).then(function(response){
         console.log(response)
+        // CLEARS MAIN AREA FOR NEW SEARCH
         $('#cityName').empty()
         $('#cityInfo').empty()
 
         let date = new Date(response.dt * 1000)
         
+        // WEATHER ICON FOR MAIN AREA
         var icon = 'http://openweathermap.org/img/wn/'+ response.weather[0].icon + '@2x.png'
 
         var iconImg = $('<img>')
         iconImg.attr('src', icon)
         $('#cityName').append(iconImg)
 
+        // APPENDS RESPONSE TO CURRENT WEATHER
         $('#cityName').append(response.name + " | " + date.toLocaleDateString('en-US'))
         $('#cityInfo').append('<div>Temperature: '+response.main.temp+'ºF</div>')
         $('#cityInfo').append('<div>Humidity: '+response.main.humidity+'%</div>')
@@ -208,10 +216,10 @@ $('.pastSearches').on('click', 'li', function(event) {
             url: uv,
             method: 'GET'
         }).then(function(responseNew){
+            
+            // FOR THE UV INDEX
             var uvindex = responseNew.current.uvi
             
-
-            console.log(responseNew)
             $('#cityInfo').append('<div>UV Index: '+'<span>'+uvindex+'</span>'+'</div>')
 
             if (uvindex <= 2) {
@@ -237,6 +245,7 @@ $('.pastSearches').on('click', 'li', function(event) {
             }
 
 
+            // FOR THE 5 DAY FORECAST
             $('.forecast').empty()
 
             for (var i = 1; i < 6; i++) {
