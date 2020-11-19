@@ -26,7 +26,13 @@ function init() {
     $('#cityInfo').append(storedCityInfo)
     
     var storedForecast = localStorage.getItem('storedForecast')
-    $('.forecast').append(storedForecast)
+    if (storedForecast === null) {
+        var noForecast = $('<div class="card box>Enter a city to see the forecast.</div>')
+        $('.forecast').append(noForecast)
+    } else {
+        var joinedForecast = storedForecast.split(",").join("")
+        $('.forecast').append(joinedForecast)
+    }
     
 }
 init()
