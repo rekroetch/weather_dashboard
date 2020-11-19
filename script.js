@@ -132,7 +132,7 @@ $('#submit').on('click', function(event){
             }
 
             // CITY INFO TO LOCAL STORAGE   
-            localStorage.setItem('storedCityInfo', JSON.stringify(tempMain.text()+"<br>"+humidityMain.text()+"<br>"+windMain.text()+"<br>"+uvindexAdd))
+            localStorage.setItem('storedCityInfo', JSON.stringify('<div class="cityInfo">' + tempMain.text()+"<br>"+humidityMain.text()+"<br>"+windMain.text()+"<br>"+uvindexAdd+ "</div>"))
 
             // RESETS FORECASTS AREA FOR EACH SEARCH
             $('.forecast').empty()
@@ -150,18 +150,18 @@ $('#submit').on('click', function(event){
 
                 // VARIABLES FOR EACH ITEM ON FORECAST CARDS
                 var dayBox = $('<div class="card box">')
-                var date = $('<div class="date">'+dateFive.toLocaleDateString('en-US')+'</div>')
+                var date = '<div class="date">'+dateFive.toLocaleDateString('en-US')+'</div>'
                 var icon = $('<div class="icon"><img src="http://openweathermap.org/img/wn/' +responseNew.daily[i].weather[0].icon+'@2x.png"></div>')
-                var high = $('<div>High: '+responseNew.daily[i].temp.max+'ºF</div>')
-                var low = $('<div>Low: '+responseNew.daily[i].temp.min+'ºF</div>')
-                var humidity = $('<div>Humidity: '+responseNew.daily[i].humidity+'%</div>')
+                var high = '<div>High: '+responseNew.daily[i].temp.max+'ºF</div>'
+                var low = '<div>Low: '+responseNew.daily[i].temp.min+'ºF</div>'
+                var humidity = '<div>Humidity: '+responseNew.daily[i].humidity+'%</div>'
                 
                 // APPEND VARIABLES TO FORECAST CARDS
                 $(dayBox).append(date, icon, high, low, humidity)
                 $('.forecast').append(dayBox)
 
                 // 5 DAY FORECAST TO ARRAY   
-                storedForecastArray.push(JSON.stringify(date.text() + "<br>"+ high.text()+"<br>"+ low.text()+"<br>"+ humidity.text()+"<br><br>"))
+                storedForecastArray.push('<div class="card box">'+date + high+ low+ humidity+"</div>")
             }    
             // 5 DAY FORECAST TO LOCAL STORAGE
             localStorage.setItem('storedForecast', storedForecastArray)
@@ -216,7 +216,7 @@ $('.pastSearches').on('click', 'li', function(event) {
             url: uv,
             method: 'GET'
         }).then(function(responseNew){
-            
+
             // FOR THE UV INDEX
             var uvindex = responseNew.current.uvi
             
